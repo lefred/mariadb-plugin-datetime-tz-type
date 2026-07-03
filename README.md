@@ -12,32 +12,31 @@ wall-clock value unchanged.
 
 ## Loading
 
-The MTR suite loads the plugin with:
+After building the plugin, you can test it with MTR:
 
-```sql
---plugin-load-add=$TYPE_DATETIME_TZ_SO
+```bash
+$ perl mtr --suite=type_datetime_tz type_datetime_tz
 ```
 
 For a manually started server, load the built plugin shared object using the
-normal MariaDB plugin loading mechanism for your build.
+normal MariaDB plugin loading mechanism:
+
+```sql
+MariaDB [test]> install soname 'type_datetime_tz';
+``
 
 ## Basic Example
 
 ```sql
 MariaDB [test]> SET time_zone='+05:30';
-Query OK, 0 rows affected (0.000 sec)
 
 MariaDB [test]> CREATE TABLE ABC (ID INT, MyTime DATETIME);
-Query OK, 0 rows affected (0.000 sec)
 
 MariaDB [test]> CREATE TABLE XYZ (ID INT, MyTime DATETIME_WITH_TIME_ZONE);
-Query OK, 0 rows affected (0.000 sec)
 
 MariaDB [test]> INSERT INTO ABC VALUES (1, CURRENT_TIMESTAMP);
-Query OK, 1 row affected (0.000 sec)
 
 MariaDB [test]> INSERT INTO XYZ VALUES (1, CURRENT_TIMESTAMP);
-Query OK, 1 row affected (0.000 sec)
 
 MariaDB [test]> SELECT MyTime FROM ABC;
 +---------------------+
@@ -60,7 +59,6 @@ After changing the session time zone:
 
 ```sql
 MariaDB [test]> SET time_zone='-05:00';
-Query OK, 0 rows affected (0.001 sec)
 
 MariaDB [test]> SELECT MyTime FROM ABC;
 +---------------------+
@@ -88,16 +86,12 @@ String values can include an explicit numeric offset:
 
 ```sql
 MariaDB [test]> SET time_zone='+09:00';
-Query OK, 0 rows affected (0.000 sec)
 
 MariaDB [test]> INSERT INTO XYZ VALUES (2, '2026-07-03 08:12:20+01:00');
-Query OK, 1 row affected (0.001 sec)
 
 MariaDB [test]> INSERT INTO XYZ VALUES (3, '2026-07-03 08:12:20+01');
-Query OK, 1 row affected (0.000 sec)
 
 MariaDB [test]> INSERT INTO XYZ VALUES (4, '2026-07-03 08:12:20');
-Query OK, 1 row affected (0.000 sec)
 
 MariaDB [test]> SELECT ID, MyTime FROM XYZ ORDER BY ID;
 +------+---------------------------+
@@ -119,7 +113,6 @@ After changing the session time zone:
 
 ```sql
 MariaDB [test]> SET time_zone='+02:00';
-Query OK, 0 rows affected (0.001 sec)
 
 MariaDB [test]> SELECT ID, MyTime FROM XYZ ORDER BY ID;
 +------+---------------------------+
@@ -139,13 +132,10 @@ Fractional seconds use the normal temporal precision range `0..6`:
 
 ```sql
 MariaDB [test]> SET time_zone='+05:30';
-Query OK, 0 rows affected (0.000 sec)
 
 MariaDB [test]> SET timestamp=1783063614.123456;
-Query OK, 0 rows affected (0.000 sec)
 
 MariaDB [test]> INSERT INTO t1 VALUES (CURRENT_TIMESTAMP(6));
-Query OK, 1 row affected (0.000 sec)
 
 MariaDB [test]> SELECT a FROM t1;
 +----------------------------------+
