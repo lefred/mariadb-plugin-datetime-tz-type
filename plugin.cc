@@ -18,6 +18,7 @@
 #define MYSQL_SERVER
 
 #include <my_global.h>
+#include <mysql_version.h>
 #include <sql_class.h>
 #include <mysql/plugin_data_type.h>
 #include "tztime.h"
@@ -26,6 +27,15 @@
 
 
 class Field_datetime_tzf;
+
+/*
+  Field::check_assignability_from() became virtual in MariaDB 13.0.
+  Older servers only consult Type_collection::aggregate_for_result(),
+  so string and temporal sources must be accepted there instead.
+*/
+#if MYSQL_VERSION_ID >= 130000
+#define DATETIME_TZ_HAVE_VIRTUAL_CHECK_ASSIGNABILITY 1
+#endif
 
 
 static const uint DATETIME_TZ_OFFSET_LENGTH= 6;
@@ -67,11 +77,19 @@ class Type_collection_datetime_tz: public Type_collection
 protected:
   const Type_handler *aggregate_common(const Type_handler *h1,
                                        const Type_handler *h2) const;
+#ifndef DATETIME_TZ_HAVE_VIRTUAL_CHECK_ASSIGNABILITY
+  const Type_handler *aggregate_if_assignable(const Type_handler *h1,
+                                              const Type_handler *h2) const;
+#endif
 public:
   const Type_handler *aggregate_for_result(const Type_handler *h1,
                                            const Type_handler *h2)
                                            const override
   {
+#ifndef DATETIME_TZ_HAVE_VIRTUAL_CHECK_ASSIGNABILITY
+    if (const Type_handler *h= aggregate_if_assignable(h1, h2))
+      return h;
+#endif
     return aggregate_common(h1, h2);
   }
   const Type_handler *aggregate_for_comparison(const Type_handler *h1,
@@ -235,6 +253,7 @@ public:
 
   const Type_handler *type_handler() const override;
 
+#ifdef DATETIME_TZ_HAVE_VIRTUAL_CHECK_ASSIGNABILITY
   bool check_assignability_from(const Type_handler *from,
                                 bool ignore) const override
   {
@@ -244,6 +263,7 @@ public:
       return false;
     return Field_timestampf::check_assignability_from(from, ignore);
   }
+#endif
 
   int store(const char *from, size_t len, CHARSET_INFO *cs) override
   {
@@ -398,6 +418,28 @@ Type_collection_datetime_tz::aggregate_common(const Type_handler *h1,
 
   return Type_aggregator::find_handler_in_array(agg, h1, h2, true);
 }
+
+
+#ifndef DATETIME_TZ_HAVE_VIRTUAL_CHECK_ASSIGNABILITY
+const Type_handler *
+Type_collection_datetime_tz::aggregate_if_assignable(const Type_handler *h1,
+                                                    const Type_handler *h2)
+                                                    const
+{
+  const Type_handler *other;
+  if (h1 == &type_handler_datetime_tz)
+    other= h2;
+  else if (h2 == &type_handler_datetime_tz)
+    other= h1;
+  else
+    return NULL;
+  if (other->cmp_type() == STRING_RESULT ||
+      other->cmp_type() == TIME_RESULT ||
+      other->can_return_date())
+    return &type_handler_datetime_tz;
+  return NULL;
+}
+#endif
 
 
 static struct st_mariadb_data_type plugin_descriptor_datetime_with_time_zone=
