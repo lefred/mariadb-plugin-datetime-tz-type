@@ -2,17 +2,20 @@
 --echo # DATETIME_WITH_TIME_ZONE plugin data type
 --echo #
 
+--disable_query_log
+call mtr.add_suppression("Plugin 'DATETIME_WITH_TIME_ZONE' is of maturity level beta while the server is");
+--enable_query_log
+
 --vertical_results
+--replace_result DATETIME_WITH_TIME_ZONE datetime_with_time_zone
 SELECT
   PLUGIN_NAME,
-  PLUGIN_VERSION,
   PLUGIN_STATUS,
   PLUGIN_TYPE,
   PLUGIN_AUTHOR,
   PLUGIN_DESCRIPTION,
   PLUGIN_LICENSE,
-  PLUGIN_MATURITY,
-  PLUGIN_AUTH_VERSION
+  PLUGIN_MATURITY
 FROM INFORMATION_SCHEMA.PLUGINS
   WHERE PLUGIN_TYPE='DATA TYPE'
     AND PLUGIN_NAME='datetime_with_time_zone';
@@ -21,8 +24,9 @@ FROM INFORMATION_SCHEMA.PLUGINS
 SET time_zone='+05:30';
 SET timestamp=1783063614;
 
-CREATE TABLE ABC (ID INT, MyTime DATETIME);
-CREATE TABLE XYZ (ID INT, MyTime DATETIME_WITH_TIME_ZONE);
+CREATE TABLE ABC (ID INT, MyTime DATETIME) CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE XYZ (ID INT, MyTime DATETIME_WITH_TIME_ZONE) CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--replace_result DATETIME_WITH_TIME_ZONE datetime_with_time_zone
 SHOW CREATE TABLE XYZ;
 
 INSERT INTO ABC VALUES(1, CURRENT_TIMESTAMP);
@@ -42,7 +46,8 @@ SELECT ID, MyTime FROM XYZ ORDER BY ID;
 DROP TABLE ABC;
 DROP TABLE XYZ;
 
-CREATE TABLE t1 (a DATETIME_WITH_TIME_ZONE(6));
+CREATE TABLE t1 (a DATETIME_WITH_TIME_ZONE(6)) CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--replace_result DATETIME_WITH_TIME_ZONE datetime_with_time_zone
 SHOW CREATE TABLE t1;
 SET time_zone='+05:30';
 SET timestamp=1783063614.123456;
