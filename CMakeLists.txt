@@ -27,7 +27,7 @@ set(PLUGIN_DESCRIPTION "MariaDB Server data type plugin that adds DATETIME_WITH_
 set(PLUGIN_LICENSE "PLUGIN_LICENSE_GPL")
 
 set(TYPE_PLUGIN_SOURCES
-    type_datetime_tz plugin.cc
+    plugin.cc
 )
 
 #
