@@ -407,20 +407,20 @@ static struct st_mariadb_data_type plugin_descriptor_datetime_with_time_zone=
 };
 
 
-maria_declare_plugin(type_datetime_tz)
+maria_declare_plugin(PLUGIN_NAME)
 {
   MariaDB_DATA_TYPE_PLUGIN,
   &plugin_descriptor_datetime_with_time_zone,
-  "datetime_with_time_zone",
-  "lefred",
-  "Data type DATETIME_WITH_TIME_ZONE",
-  PLUGIN_LICENSE_GPL,
+  PLUGIN_TYPE_NAME,
+  PLUGIN_AUTHOR,
+  PLUGIN_DESCRIPTION,
+  PLUGIN_LICENSE,
   0,
   0,
-  0x0100,
+  PLUGIN_HEX_VERSION,
   NULL,
   NULL,
-  "0.2.0",
+  PLUGIN_VERSION,
   MariaDB_PLUGIN_MATURITY_BETA
 }
 maria_declare_plugin_end;

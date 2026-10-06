@@ -14,5 +14,74 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1335 USA
 
-MYSQL_ADD_PLUGIN(type_datetime_tz plugin.cc RECOMPILE_FOR_EMBEDDED
-                 MODULE_ONLY COMPONENT Test)
+cmake_minimum_required(VERSION 3.12)
+
+project(g)
+
+set(PLUGIN_NAME "type_datetime_tz")
+set(PLUGIN_TYPE_NAME "date_time_with_timezone")
+set(PLUGIN_AUTHOR "lefred")
+set(PLUGIN_VERSION "0.2.2")
+set(PLUGIN_HEX_VERSION "0x000202")
+set(PLUGIN_DESCRIPTION "MariaDB Server data type plugin that adds DATETIME_WITH_TIME_ZONE")
+set(PLUGIN_LICENSE "PLUGIN_LICENSE_GPL")
+
+set(TYPE_PLUGIN_SOURCES
+    type_datetime_tz plugin.cc
+)
+
+#
+# New MariaDB external plugin infrastructure.
+# QUIET is important so older MariaDB versions can fall back to
+# MYSQL_ADD_PLUGIN().
+#
+find_package(mariadb-plugin QUIET)
+
+if(COMMAND MARIADB_ADD_PLUGIN)
+
+    message(STATUS "Building ${PLUGIN_NAME} using MARIADB_ADD_PLUGIN")
+
+    MARIADB_ADD_PLUGIN(${PLUGIN_NAME}
+        ${TYPE_PLUGIN_SOURCES}
+        MODULE_ONLY
+        RECOMPILE_FOR_EMBEDDED
+        AUTHOR "${PLUGIN_AUTHOR}"
+        VERSION "${PLUGIN_VERSION}"
+        DESCRIPTION "${PLUGIN_DESCRIPTION}"
+    )
+
+elseif(COMMAND MYSQL_ADD_PLUGIN)
+
+    message(STATUS "Building ${PLUGIN_NAME} using legacy MYSQL_ADD_PLUGIN")
+
+    MYSQL_ADD_PLUGIN(${PLUGIN_NAME}
+        ${TYPE_PLUGIN_SOURCES}
+        MODULE_ONLY
+        RECOMPILE_FOR_EMBEDDED
+    )
+
+    #
+    # MARIADB_ADD_PLUGIN provides these definitions automatically.
+    # Legacy MYSQL_ADD_PLUGIN does not, so provide them explicitly.
+    #
+    target_compile_definitions(${PLUGIN_NAME} PRIVATE
+        PLUGIN_AUTHOR="${PLUGIN_AUTHOR}"
+        PLUGIN_DESCRIPTION="${PLUGIN_DESCRIPTION}"
+        PLUGIN_VERSION="${PLUGIN_VERSION}"
+        PLUGIN_HEX_VERSION=${PLUGIN_HEX_VERSION}
+        PLUGIN_LICENSE=${PLUGIN_LICENSE}
+        PLUGIN_NAME="${PLUGIN_NAME}"
+        PLUGIN_TYPE_NAME="${PLUGIN_TYPE_NAME}"
+    )
+
+else()
+
+    message(FATAL_ERROR
+        "Cannot build ${PLUGIN_NAME}: neither MARIADB_ADD_PLUGIN nor "
+        "MYSQL_ADD_PLUGIN is available."
+    )
+
+endif()
+
+include(CPack)
+
