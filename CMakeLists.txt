@@ -19,7 +19,6 @@ cmake_minimum_required(VERSION 3.12)
 project(g)
 
 set(PLUGIN_NAME "type_datetime_tz")
-set(PLUGIN_TYPE_NAME "date_time_with_timezone")
 set(PLUGIN_AUTHOR "lefred")
 set(PLUGIN_VERSION "0.2.2")
 set(PLUGIN_HEX_VERSION "0x000202")
@@ -71,7 +70,6 @@ elseif(COMMAND MYSQL_ADD_PLUGIN)
         PLUGIN_HEX_VERSION=${PLUGIN_HEX_VERSION}
         PLUGIN_LICENSE=${PLUGIN_LICENSE}
         PLUGIN_NAME="${PLUGIN_NAME}"
-        PLUGIN_TYPE_NAME="${PLUGIN_TYPE_NAME}"
     )
 
 else()

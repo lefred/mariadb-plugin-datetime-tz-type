@@ -411,7 +411,7 @@ maria_declare_plugin(PLUGIN_NAME)
 {
   MariaDB_DATA_TYPE_PLUGIN,
   &plugin_descriptor_datetime_with_time_zone,
-  PLUGIN_TYPE_NAME,
+  "DATETIME_WITH_TIME_ZONE",
   PLUGIN_AUTHOR,
   PLUGIN_DESCRIPTION,
   PLUGIN_LICENSE,
